@@ -332,9 +332,8 @@ export default function InstantQuoteFormPage() {
         "pk_test_51Rt8ZBIFxVk3zkjINQDfzNl7rjX9eNVDX6pDpuaA3ejFlKD9L8SMybH1bWSzZ8p0SSrVk5jhqhC0TVrPlRVX5T9W00o4wQbg9C"
       );
 
-      const response = await fetch(
-        "http://localhost:5000/api/payments/create-checkout-session",
-        {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/payments/create-checkout-session`,
+          {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
