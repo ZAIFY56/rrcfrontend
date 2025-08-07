@@ -1,0 +1,321 @@
+Skip to content
+DEV Community
+Find related posts...
+Powered by  Algolia
+Log in
+Create account
+
+17
+Jump to Comments
+
+31
+Save
+
+Boost
+
+Cover image for How to fix Page Not Found on netlify
+Kapil Pandey
+Kapil Pandey
+Posted on Jul 19, 2020
+
+
+53
+
+13
+How to fix Page Not Found on netlify
+#
+webdev
+#
+react
+#
+github
+#
+netlify
+Since you are reading this, you surely might have came across the same error as shown in the cover image.
+
+I'm not sure if other static site servers/platforms are all like that, but if you deploy SPA to Netlify you can only navigate from index.html to other pages using Links.Once you refresh or type a URL directly in the address bar you'll get 404.
+
+Why does this error occur?
+If your SPA is build with React then React Router handles routing on the client side (browser) when you visit internal page (e.g. http://localhost:3000/about) but once you host your SPA on Netlify (server-side) the routing logic has to be modified because Netlify does not know how to handle the route.
+
+How to fix the issue?
+As per the doc, you need to create a file named _redirects in the root folder.You can go to the link mentioned above to know more about it.I'll directly show how to fix it:
+
+Create a file named _redirects without any extension inside public folder.
+Copy paste the below content in the file
+/*    /index.html   200
+Push your code and redeploy
+Cheers 🥂 you fixed the broken link!
+
+profile
+H Company
+Promoted
+
+Runner H image
+
+Overwhelmed? Let an AI Handle Your Tasks
+Runner H clears your inbox, summarizes Slack threads, and plans your week — without you lifting a finger. You delegate once. It handles the rest.
+
+Try Runner H
+
+Read More
+Top comments (17)
+Subscribe
+pic
+Add to the discussion
+ 
+ 
+piyush profile image
+Piyush Suthar
+•
+Jul 19 '20
+
+And if you want to host a react app on any Cpanel or shared hosting, then adding .htaccess file will be super useful.
+
+<IfModule mod_rewrite.c>
+
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-l
+  RewriteRule . /index.html [L]
+
+</IfModule>
+
+11
+ likes
+Like
+
+Reply
+ 
+ 
+nitsuah profile image
+nitsuah
+•
+May 10 '22
+
+I created an account here just to tell you that you are awesome.
+
+
+2
+ likes
+Like
+
+Reply
+ 
+ 
+hemant profile image
+Hemant Joshi
+•
+Jul 19 '20
+
+Life-saving Post
+Thank You
+
+
+2
+ likes
+Like
+
+Reply
+ 
+ 
+kapi1 profile image
+Kapil Pandey 
+•
+Jul 19 '20
+
+Glad to be of help!
+
+
+2
+ likes
+Like
+
+Reply
+ 
+ 
+mzaini30 profile image
+Zen
+•
+Jul 19 '20
+
+You can using server configuration: router.vuejs.org/guide/essentials/...
+
+
+2
+ likes
+Like
+
+Reply
+ 
+ 
+ineeader profile image
+Inee Ader 🐌
+•
+Mar 4 '21
+
+This fixed it! Thank you!
+
+
+2
+ likes
+Like
+
+Reply
+ 
+ 
+ytrkptl profile image
+Yatrik Patel
+•
+Dec 27 '20
+
+I’ve ran into this issue before and didn’t exactly know what to do. I guess I’ll try this out and see. Thanks.
+
+
+2
+ likes
+Like
+
+Reply
+ 
+ 
+yogeshdatir profile image
+Yogesh Datir
+•
+Oct 21 '21
+
+Thanks...
+
+
+2
+ likes
+Like
+
+Reply
+ 
+ 
+avanikadarji profile image
+Avanika
+•
+Mar 25 '21
+
+Thank you!! your solution solved my issue.
+
+
+2
+ likes
+Like
+
+Reply
+ 
+ 
+thatjsdev profile image
+Nishant Mendiratta
+•
+Jan 23 '21
+
+Worked like a charm, thank you.
+
+
+2
+ likes
+Like
+
+Reply
+ 
+ 
+kuzzzzz profile image
+kuzzzzz
+•
+Oct 26 '20
+
+Thanks this worked like magic
+
+
+2
+ likes
+Like
+
+Reply
+View full discussion (17 comments)
+Code of Conduct • Report abuse
+profile
+MongoDB
+Promoted
+
+Scale globally with MongoDB Atlas. Try free.
+
+Scale globally with MongoDB Atlas. Try free.
+MongoDB Atlas is the global, multi-cloud database for modern apps trusted by developers and enterprises to build, scale, and run cutting-edge applications, with automated scaling, built-in security, and 125+ cloud regions.
+
+Learn More
+
+
+Kapil Pandey
+Follow
+0.1+0.2==0.3 🤔false Sounds weird but it's absolutely correct & that's what I deal with #engineer 👨🏻‍💻
+Location
+Nainital, UK,India
+Work
+SSE - Paytm
+Joined
+Jul 19, 2020
+More from Kapil Pandey
+What is JavaScript?
+#javascript #webdev #beginners #tutorial
+[Solved] “Treating warnings as errors because of process.env.CI = true”
+#webdev #javascript #netlify #devops
+Adding Profile page to Github using README.md
+#github #git #design #webdev
+profile
+MongoDB
+Promoted
+
+MongoDB Atlas runs apps anywhere. Try it now.
+
+MongoDB Atlas runs apps anywhere. Try it now.
+MongoDB Atlas lets you build and run modern apps anywhere—across AWS, Azure, and Google Cloud. With availability in 115+ regions, deploy near users, meet compliance, and scale confidently worldwide.
+
+Start Free
+
+/*    /index.html   200
+💎 DEV Diamond Sponsors
+
+Thank you to our Diamond Sponsors for supporting the DEV Community
+
+Google AI - Official AI Model and Platform Partner
+Google AI is the official AI Model and Platform Partner of DEV
+
+Neon - Official Database Partner
+Neon is the official database partner of DEV
+
+Algolia - Official Search Partner
+Algolia is the official search partner of DEV
+
+DEV Community — A space to discuss and keep up software development and manage your software career
+
+Home
+DEV++
+Reading List
+Podcasts
+Videos
+Tags
+DEV Education Tracks
+DEV Challenges
+DEV Help
+Advertise on DEV
+DEV Showcase
+About
+Contact
+Free Postgres Database
+Software comparisons
+Forem Shop
+Code of Conduct
+Privacy Policy
+Terms of use
+Built on Forem — the open source software that powers DEV and other inclusive communities.
+
+Made with love and Ruby on Rails. DEV Community © 2016 - 2025.
