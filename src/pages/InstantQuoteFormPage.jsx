@@ -527,7 +527,6 @@ We'll process your request and get back to you shortly.`}
         <div className="container mx-auto mt-4 md:mt-14 flex flex-col lg:flex-row gap-8 px-4">
           <motion.div
             className="lg:w-3/4 bg-white"
-            initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
             variants={formVariants}
