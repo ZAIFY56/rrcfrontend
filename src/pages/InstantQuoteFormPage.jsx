@@ -319,21 +319,26 @@ export default function InstantQuoteFormPage() {
     sessionStorage.setItem("quoteFormData", JSON.stringify(formData));
 
     if (paymentMethod === "cash" || paymentCompleted) {
-      // For cash payment or after successful card payment, just submit the form
       await handleSubmitForm(e);
       return;
     }
 
-    // For card payment, process with Stripe first
     setIsSubmitting(true);
 
     try {
-      const stripe = await loadStripe(
-        "pk_test_51Rt8ZBIFxVk3zkjINQDfzNl7rjX9eNVDX6pDpuaA3ejFlKD9L8SMybH1bWSzZ8p0SSrVk5jhqhC0TVrPlRVX5T9W00o4wQbg9C"
-      );
+      // 1. Initialize Stripe with validation
+      const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/payments/create-checkout-session`,
-          {
+      if (!stripe) {
+        throw new Error(
+          "Stripe failed to initialize. Please check your public key."
+        );
+      }
+
+      // 2. Create checkout session
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/payments/create-checkout-session`,
+        {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -346,22 +351,33 @@ export default function InstantQuoteFormPage() {
         }
       );
 
+      // 3. Validate response
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || "Failed to create payment session"
+        );
       }
 
       const session = await response.json();
-      const result = await stripe.redirectToCheckout({
+
+      // 4. Validate session ID
+      if (!session?.id) {
+        console.error("Invalid session response:", session);
+        throw new Error("Invalid payment session received from server");
+      }
+
+      // 5. Redirect to checkout
+      const { error } = await stripe.redirectToCheckout({
         sessionId: session.id,
       });
 
-      if (result.error) {
-        console.error(result.error.message);
-        // Handle error (show to user)
+      if (error) {
+        throw new Error(error.message);
       }
     } catch (error) {
       console.error("Payment error:", error);
-      // Handle error (show to user)
+      alert(`Payment failed: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
