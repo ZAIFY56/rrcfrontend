@@ -257,7 +257,7 @@ const ContactUs = () => {
                     href="mailto:info@rrcourires.co.uk"
                     className="hover:text-primary transition-colors"
                   >
-                    info@rrcourires.co.uk
+                    info@rrcouriers.co.uk
                   </a>
                 </p>
                 <p className="text-gray-600 2xl:text-[20px] text-md mt-2">

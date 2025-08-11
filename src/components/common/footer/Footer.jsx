@@ -129,7 +129,7 @@ const Footer = () => {
               href="mailto:helloworld@rapidresponsecourier.com"
               className="mb-1 2xl:text-[20px] hover:underline block"
             >
-              info@rrcourires.co.uk
+              info@rrcouriers.co.uk
             </a>
             <a
               href="tel:+9710000000000"
