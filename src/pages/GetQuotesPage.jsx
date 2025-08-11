@@ -663,7 +663,7 @@ function GetQuotesPage() {
       {tripDistance ? (
         <>
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4"
+            className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
@@ -697,28 +697,6 @@ function GetQuotesPage() {
               />
             </motion.div>
           </motion.div>
-
-          <div className="max-w-6xl mx-auto px-4 pb-10 mt-6">
-            <div className="bg-gray-100 p-4 rounded-md">
-              <h4 className="font-semibold text-primary mb-2">
-                Pricing Information:
-              </h4>
-              <ul className="text-sm text-gray-700 list-disc pl-5 space-y-1">
-                <li>
-                  For London locations: Base price + £15 congestion charge (if
-                  applicable) + mileage over 12 miles
-                </li>
-                <li>
-                  For outside London: Price per mile only (no base price or
-                  congestion charge)
-                </li>
-                <li>
-                  Luton vans are available on demand - please contact us for
-                  pricing
-                </li>
-              </ul>
-            </div>
-          </div>
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-20 px-6 text-center max-w-2xl mx-auto">
