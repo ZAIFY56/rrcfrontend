@@ -221,6 +221,9 @@ export default function InstantQuoteFormPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const selectedVanPrice = location.state?.totalPrice || 90.0;
+  const selectedDate = location.state?.selectedDate || "";
+  const selectedTime = location.state?.selectedTime || "";
+
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(() => {
@@ -273,6 +276,8 @@ export default function InstantQuoteFormPage() {
       // Add additional fields
       formDataEncoded.append("paymentMethod", paymentMethod);
       formDataEncoded.append("amount", selectedVanPrice);
+      formDataEncoded.append("selected_date", selectedDate);
+      formDataEncoded.append("selected_time", selectedTime);
       formDataEncoded.append(
         "paymentStatus",
         paymentMethod === "cash" ? "pending" : "paid"
@@ -504,7 +509,8 @@ First Name: %first_name%
 Last Name: %last_name%
 Email: %email%
 Telephone: %telephone%
-
+Collection Date: %selected_date%
+Collection Time: %selected_time%
 Collection Address:
 Address Line: %collection_address_line%
 City: %collection_city%
@@ -524,6 +530,8 @@ We'll process your request and get back to you shortly.`}
           name="_autoresponse_subject"
           value="Thank you for contacting us"
         />
+        <input type="hidden" name="selected_date" value={selectedDate} />
+        <input type="hidden" name="selected_time" value={selectedTime} />
         <div className="container mx-auto mt-4 md:mt-14 flex flex-col lg:flex-row gap-8 px-4">
           <motion.div
             className="lg:w-3/4 bg-white"
@@ -674,6 +682,23 @@ We'll process your request and get back to you shortly.`}
                 className="w-full h-auto rounded-md"
                 loading="lazy"
               />
+            </motion.div>
+            <motion.div
+              className="p-6 pb-6"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <h2 className="text-xl 2xl:text-[32px] font-semibold mb-2">
+                <AnimatedText text="Collection Time" delay={0.2} />
+              </h2>
+              <p className="text-sm mb-4 2xl:text-[20px]">
+                Selected Date: {selectedDate || "Not specified"}
+              </p>
+              <p className="text-sm mb-4 2xl:text-[20px]">
+                Selected Time: {selectedTime || "Not specified"}
+              </p>
             </motion.div>
             <motion.div
               className="p-6 pb-6"

@@ -286,7 +286,7 @@ const PriceInfo = ({ price, total, breakdown, isInCongestionZone }) => {
   );
 };
 
-const VanCard = ({ van, index, variants }) => {
+const VanCard = ({ van, index, variants, selectedDate, selectedTime }) => {
   const navigate = useNavigate();
 
   const calculatePrice = (
@@ -438,6 +438,8 @@ const VanCard = ({ van, index, variants }) => {
                   pickup: van.pickup,
                   destination: van.destination,
                   distance: van.tripDistance,
+                  selectedDate,
+                  selectedTime,
                 },
               },
             });
@@ -449,6 +451,8 @@ const VanCard = ({ van, index, variants }) => {
                 totalPrice: total,
                 priceBreakdown: breakdown,
                 isInCongestionZone,
+                selectedDate,
+                selectedTime,
               },
             });
           }
@@ -786,6 +790,8 @@ function GetQuotesPage() {
                   isPickupInLondon,
                   isDestinationInLondon,
                 }}
+                selectedDate={selectedDate}
+                selectedTime={selectedTime}
                 index={index}
                 variants={cardVariants}
               />
