@@ -305,7 +305,11 @@ export default function InstantQuoteFormPage() {
       formDataEncoded.append("selected_time", selectedTime);
       formDataEncoded.append(
         "paymentStatus",
-        paymentMethod === "cash" ? "pending" : "paid"
+        paymentCompleted
+          ? "paid"
+          : paymentMethod === "cash"
+            ? "pending"
+            : "paid"
       );
       formDataEncoded.append("_captcha", "false"); // Disable CAPTCHA if not needed
       formDataEncoded.append("_template", "table"); // Use table template
@@ -364,6 +368,7 @@ export default function InstantQuoteFormPage() {
           "Stripe failed to initialize. Please check your public key."
         );
       }
+      sessionStorage.setItem("quotePaymentMethod", paymentMethod);
 
       // 2. Create checkout session
       const response = await fetch(
