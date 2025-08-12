@@ -451,8 +451,9 @@ const VanCard = ({ van, index, variants, selectedDate, selectedTime }) => {
                 totalPrice: total,
                 priceBreakdown: breakdown,
                 isInCongestionZone,
-                selectedDate,
-                selectedTime,
+
+                selectedDate: van.selectedDate,
+                selectedTime: van.selectedTime,
               },
             });
           }
@@ -779,23 +780,25 @@ function GetQuotesPage() {
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
           >
-            {vanOptions.map((van, index) => (
-              <VanCard
-                key={index}
-                van={{
-                  ...van,
-                  tripDistance,
-                  pickup,
-                  destination,
-                  isPickupInLondon,
-                  isDestinationInLondon,
-                }}
-                selectedDate={selectedDate}
-                selectedTime={selectedTime}
-                index={index}
-                variants={cardVariants}
-              />
-            ))}
+            {selectedDate &&
+              selectedTime &&
+              vanOptions.map((van, index) => (
+                <VanCard
+                  key={index}
+                  van={{
+                    ...van,
+                    tripDistance,
+                    pickup,
+                    destination,
+                    isPickupInLondon,
+                    isDestinationInLondon,
+                    selectedDate,
+                    selectedTime,
+                  }}
+                  index={index}
+                  variants={cardVariants}
+                />
+              ))}
 
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
