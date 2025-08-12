@@ -221,8 +221,12 @@ export default function InstantQuoteFormPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const selectedVanPrice = location.state?.totalPrice || 90.0;
-  const selectedDate = location.state?.selectedDate || "";
-  const selectedTime = location.state?.selectedTime || "";
+  const [selectedDate, setSelectedDate] = useState(
+    location.state?.selectedDate || ""
+  );
+  const [selectedTime, setSelectedTime] = useState(
+    location.state?.selectedTime || ""
+  );
 
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -232,6 +236,27 @@ export default function InstantQuoteFormPage() {
     return savedData ? JSON.parse(savedData) : {};
   });
   const [paymentCompleted, setPaymentCompleted] = useState(false);
+  // In InstantQuoteFormPage component
+  useEffect(() => {
+    // Restore from sessionStorage on mount
+    const savedDate = sessionStorage.getItem("quoteSelectedDate");
+    const savedTime = sessionStorage.getItem("quoteSelectedTime");
+
+    if (savedDate) setSelectedDate(savedDate);
+    if (savedTime) setSelectedTime(savedTime);
+  }, []);
+
+  // When receiving props from location state
+  useEffect(() => {
+    if (location.state?.selectedDate) {
+      setSelectedDate(location.state.selectedDate);
+      sessionStorage.setItem("quoteSelectedDate", location.state.selectedDate);
+    }
+    if (location.state?.selectedTime) {
+      setSelectedTime(location.state.selectedTime);
+      sessionStorage.setItem("quoteSelectedTime", location.state.selectedTime);
+    }
+  }, [location.state]);
 
   // Check for Stripe redirect with success and restore form data
   useEffect(() => {
@@ -351,7 +376,7 @@ export default function InstantQuoteFormPage() {
           body: JSON.stringify({
             amount: selectedVanPrice,
             metadata: formData,
-            return_url: `${window.location.origin}${window.location.pathname}?payment_success=true`,
+            return_url: `${window.location.origin}${window.location.pathname}?payment_success=true&date=${encodeURIComponent(selectedDate)}&time${encodeURIComponent(selectedTime)}`,
           }),
         }
       );
