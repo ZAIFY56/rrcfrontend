@@ -127,7 +127,7 @@ export default function CourierPartners() {
   const offsetRef = useRef(0);
   useEffect(() => {
     let frame;
-    const speed = 1.5; // px/frame
+    const speed = 1; // px/frame
     const loop = () => {
       offsetRef.current -= speed;
       if (Math.abs(offsetRef.current) >= singleSetWidth) {

@@ -96,7 +96,7 @@ export default function WhyChoose() {
   const offsetRef = useRef(0);
   useEffect(() => {
     let animationFrame;
-    const speed = 1.5; // px/frame
+    const speed = 1; // px/frame
 
     const loop = () => {
       offsetRef.current -= speed;

@@ -130,7 +130,7 @@ export default function Feedback() {
   const offsetRef = useRef(0);
   useEffect(() => {
     let animationFrame;
-    const speed = 1.5; // px/frame
+    const speed = 0.8; // px/frame
     const loop = () => {
       offsetRef.current -= speed;
       if (Math.abs(offsetRef.current) >= singleSetWidth) {

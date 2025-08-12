@@ -323,6 +323,7 @@ const VanCard = ({ van, index, variants }) => {
     let basePrice = 0;
     let extraMiles = 0;
     let extraMilesCost = 0;
+    distance = Number(distance);
 
     if (isPickupInLondon || isDestinationInLondon) {
       basePrice = basePrices[vanType] || 75;
@@ -468,6 +469,66 @@ function GetQuotesPage() {
   const [tripDistance, setTripDistance] = useState(null);
   const [isPickupInLondon, setIsPickupInLondon] = useState(false);
   const [isDestinationInLondon, setIsDestinationInLondon] = useState(false);
+  const [tripTime, setTripTime] = useState(null);
+  const [tripMinutes, setTripMinutes] = useState(0);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+  const [minDateTime, setMinDateTime] = useState({
+    date: "",
+    time: "",
+  });
+
+  useEffect(() => {
+    if (tripMinutes > 0) {
+      const now = new Date();
+      const bufferMinutes = 30;
+      const totalMinutes = tripMinutes + bufferMinutes;
+
+      const minDateTime = new Date(now.getTime() + totalMinutes * 60000);
+
+      const minDateStr = minDateTime.toISOString().split("T")[0];
+
+      const hours = minDateTime.getHours().toString().padStart(2, "0");
+      const minutes = minDateTime.getMinutes().toString().padStart(2, "0");
+      const minTimeStr = `${hours}:${minutes}`;
+
+      setMinDateTime({
+        date: minDateStr,
+        time: minTimeStr,
+      });
+      if (selectedDate && selectedDate < minDateStr) {
+        setSelectedDate(minDateStr);
+      }
+      if (
+        selectedTime &&
+        ((selectedDate === minDateStr && selectedTime < minTimeStr) ||
+          selectedDate < minDateStr)
+      ) {
+        setSelectedTime(minTimeStr);
+      }
+    }
+  }, [tripMinutes, selectedDate, selectedTime]);
+
+  function handleDateChange(event) {
+    const selected = event.target.value;
+    if (!tripTime || selected >= minDateTime.date) {
+      setSelectedDate(selected);
+      if (selected === minDateTime.date && selectedTime < minDateTime.time) {
+        setSelectedTime(minDateTime.time);
+      }
+    }
+  }
+
+  function handleTimeChange(event) {
+    const selected = event.target.value;
+    if (
+      !tripTime ||
+      selectedDate > minDateTime.date ||
+      (selectedDate === minDateTime.date && selected >= minDateTime.time)
+    ) {
+      setSelectedTime(selected);
+    }
+  }
 
   useEffect(() => {
     if (pickupLocation) {
@@ -489,6 +550,21 @@ function GetQuotesPage() {
           const meters = data.features[0].properties.distance;
           const mi = (meters / 1609.344).toFixed(2);
           setTripDistance(mi);
+
+          const seconds = data.features[0].properties.time;
+          const totalMinutes = Math.round(seconds / 60);
+          setTripMinutes(totalMinutes);
+
+          let formattedTime;
+          if (totalMinutes >= 60) {
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            formattedTime = `${hours} hour${hours > 1 ? "s" : ""} ${minutes} min`;
+          } else {
+            formattedTime = `${totalMinutes} min`;
+          }
+
+          setTripTime(formattedTime);
         } catch (error) {
           console.error("Error calculating distance:", error);
         }
@@ -621,43 +697,74 @@ function GetQuotesPage() {
       </motion.div>
 
       <motion.div
-        className="mt-10 md:mt-14 flex flex-wrap justify-between items-center bg-primary text-white p-4 rounded-md max-w-5xl mx-auto mb-8 gap-4"
+        className="mt-10 md:mt-14 flex flex-col bg-primary text-white p-4 rounded-md max-w-5xl mx-auto mb-8 gap-4"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }}
         variants={infoBarVariants}
       >
-        <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm mb-1">Pickup from:</label>
-          <AutocompleteInput
-            placeholder="Enter pickup location"
-            defaultValue={pickup}
-            onSelect={setPickup}
-            setLocation={setPickupLocation}
-          />
-        </div>
+        <div className="flex justify-between gap-10 items-start">
+          <BackButton icon={backIcon} />
+          {tripTime && (
+            <p className="text-xs md:mt-6 text-gray-300 ">
+              Earliest available: {minDateTime.date} at {minDateTime.time}
+            </p>
+          )}
 
-        <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm mb-1">Destination:</label>
-          <AutocompleteInput
-            placeholder="Enter destination"
-            defaultValue={destination}
-            onSelect={setDestination}
-            setLocation={setDropoffLocation}
-          />
-        </div>
-
-        <div className="flex-1 min-w-[200px]">
-          <div className="text-white flex p-2 mt-4 gap-4">
-            <img src={vanIcon} alt="van-icon" className="w-12 h-8 mt-2" />
+          <div className="text-white flex items-center gap-4">
+            <img src={vanIcon} alt="van-icon" className="w-12 h-8" />
             <div>
-              <p className="text-sm font-semibold ">Earliest Delivery:</p>
-              <p className="text-sm font-semibold ">14:21 if Booked Now</p>
+              <p className="text-xs md:text-sm md:font-semibold">
+                Estimated Travel Time:
+              </p>
+              {tripTime ? (
+                <p className="text-xs md:text-sm md:font-semibold">
+                  {tripTime}
+                </p>
+              ) : (
+                <p className="text-sm text-gray-300">—</p>
+              )}
             </div>
           </div>
         </div>
 
-        <BackButton icon={backIcon} />
+        <div className="flex flex-wrap justify-between gap-4">
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-sm mb-1">Pickup from:</label>
+            <AutocompleteInput
+              placeholder="Enter pickup location"
+              defaultValue={pickup}
+              onSelect={setPickup}
+              setLocation={setPickupLocation}
+            />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={handleDateChange}
+              min={minDateTime.date}
+              className="mt-2 p-1 border text-gray-600 rounded text-sm w-full"
+            />
+          </div>
+
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-sm mb-1">Destination:</label>
+            <AutocompleteInput
+              placeholder="Enter destination"
+              defaultValue={destination}
+              onSelect={setDestination}
+              setLocation={setDropoffLocation}
+            />
+            <input
+              type="time"
+              value={selectedTime}
+              onChange={handleTimeChange}
+              min={
+                selectedDate === minDateTime.date ? minDateTime.time : undefined
+              }
+              className="mt-2 p-1 border text-gray-600 rounded text-sm w-full"
+            />
+          </div>
+        </div>
       </motion.div>
 
       {tripDistance ? (

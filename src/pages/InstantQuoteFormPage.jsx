@@ -708,161 +708,117 @@ We'll process your request and get back to you shortly.`}
             </motion.div>
 
             {/* Payment Method Selection */}
-           <motion.div
-  className="p-6 pb-6"
-  initial={{ opacity: 0, y: 30 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true }}
-  transition={{ duration: 0.8 }}
->
-  <h2 className="text-xl 2xl:text-[32px] font-semibold mb-4">
-    <AnimatedText text="Payment Method" delay={0.2} />
-  </h2>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <motion.div
-      className="flex items-center"
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: 0.1, duration: 0.5 }}
-    >
-      <input
-        type="radio"
-        id="cash"
-        name="paymentMethod"
-        value="cash"
-        checked={paymentMethod === "cash" && !paymentCompleted}
-        onChange={() => setPaymentMethod("cash")}
-        className="mr-2 h-4 w-4"
-        disabled={paymentCompleted}
-      />
-      <label htmlFor="cash" className="text-sm 2xl:text-[20px]">
-        Pay with Cash
-      </label>
-    </motion.div>
-    <motion.div
-      className="flex items-center"
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: 0.2, duration: 0.5 }}
-    >
-      <input
-        type="radio"
-        id="card"
-        name="paymentMethod"
-        value="card"
-        checked={paymentMethod === "card" || paymentCompleted}
-        onChange={() => setPaymentMethod("card")}
-        className="mr-2 h-4 w-4"
-        disabled={paymentCompleted}
-      />
-      <label htmlFor="card" className="text-sm 2xl:text-[20px]">
-        Pay with Card
-      </label>
-      {paymentCompleted && (
-        <span className="ml-2 text-green-600 text-sm">✓ Payment Successful</span>
-      )}
-    </motion.div>
-  </div>
-</motion.div>
-
-{/* Terms and Conditions - Only required for form submission */}
-{!paymentCompleted && (
-  <motion.div
-    className="p-6 space-y-4 mb-6"
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.8 }}
-  >
-    <motion.div
-      className="flex items-center"
-      initial={{ opacity: 0, x: -20 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: 0.1, duration: 0.5 }}
-    >
-      <input
-        type="checkbox"
-        id="terms"
-        name="terms"
-        className="mr-2 h-4 w-4 appearance-none border border-primary rounded checked:bg-primary checked:border-transparent focus:ring-0 focus:ring-offset-0"
-        required={!paymentCompleted} // Only required if payment not completed
-      />
-      <span className="text-sm 2xl:text-[20px]">
-        I have read and accepted the T&Cs{" "}
-        <span className="text-red-500">*</span>
-      </span>
-    </motion.div>
-    <motion.div
-      className="flex items-center"
-      initial={{ opacity: 0, x: -20 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: 0.2, duration: 0.5 }}
-    >
-      <input
-        type="checkbox"
-        id="loading"
-        name="loading_notice"
-        className="mr-2 h-4 w-4 appearance-none border border-primary rounded checked:bg-primary checked:border-transparent focus:ring-0 focus:ring-offset-0"
-        required={!paymentCompleted} // Only required if payment not completed
-      />
-      <span className="text-sm 2xl:text-[20px]">
-        I have read and agree to the loading notice below{" "}
-        <span className="text-red-500">*</span>
-      </span>
-    </motion.div>
-  </motion.div>
-)}
-
             <motion.div
-              className="p-6 space-y-4 mb-6"
+              className="p-6 pb-6"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <motion.div
-                className="flex items-center"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1, duration: 0.5 }}
-              >
-                <input
-                  type="checkbox"
-                  id="terms"
-                  name="terms"
-                  className="mr-2 h-4 w-4 appearance-none border border-primary rounded checked:bg-primary checked:border-transparent focus:ring-0 focus:ring-offset-0"
-                  required
-                />
-                <span className="text-sm 2xl:text-[20px]">
-                  I have read and accepted the T&Cs{" "}
-                  <span className="text-red-500">*</span>
-                </span>
-              </motion.div>
-              <motion.div
-                className="flex items-center"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-              >
-                <input
-                  type="checkbox"
-                  id="loading"
-                  name="loading_notice"
-                  className="mr-2 h-4 w-4 appearance-none border border-primary rounded checked:bg-primary checked:border-transparent focus:ring-0 focus:ring-offset-0"
-                  required
-                />
-                <span className="text-sm 2xl:text-[20px]">
-                  I have read and agree to the loading notice below{" "}
-                  <span className="text-red-500">*</span>
-                </span>
-              </motion.div>
+              <h2 className="text-xl 2xl:text-[32px] font-semibold mb-4">
+                <AnimatedText text="Payment Method" delay={0.2} />
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <motion.div
+                  className="flex items-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1, duration: 0.5 }}
+                >
+                  <input
+                    type="radio"
+                    id="cash"
+                    name="paymentMethod"
+                    value="cash"
+                    checked={paymentMethod === "cash" && !paymentCompleted}
+                    onChange={() => setPaymentMethod("cash")}
+                    className="mr-2 h-4 w-4"
+                    disabled={paymentCompleted}
+                  />
+                  <label htmlFor="cash" className="text-sm 2xl:text-[20px]">
+                    Pay with Cash
+                  </label>
+                </motion.div>
+                <motion.div
+                  className="flex items-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                >
+                  <input
+                    type="radio"
+                    id="card"
+                    name="paymentMethod"
+                    value="card"
+                    checked={paymentMethod === "card" || paymentCompleted}
+                    onChange={() => setPaymentMethod("card")}
+                    className="mr-2 h-4 w-4"
+                    disabled={paymentCompleted}
+                  />
+                  <label htmlFor="card" className="text-sm 2xl:text-[20px]">
+                    Pay with Card
+                  </label>
+                  {paymentCompleted && (
+                    <span className="ml-2 text-green-600 text-sm">
+                      ✓ Payment Successful
+                    </span>
+                  )}
+                </motion.div>
+              </div>
             </motion.div>
+
+            {/* Terms and Conditions - Only required for form submission */}
+            {!paymentCompleted && (
+              <motion.div
+                className="p-6 space-y-4 mb-6"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+              >
+                <motion.div
+                  className="flex items-center"
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1, duration: 0.5 }}
+                >
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    name="terms"
+                    className="mr-2 h-4 w-4 appearance-none border border-primary rounded checked:bg-primary checked:border-transparent focus:ring-0 focus:ring-offset-0"
+                    required={!paymentCompleted} // Only required if payment not completed
+                  />
+                  <span className="text-sm 2xl:text-[20px]">
+                    I have read and accepted the T&Cs{" "}
+                    <span className="text-red-500">*</span>
+                  </span>
+                </motion.div>
+                <motion.div
+                  className="flex items-center"
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                >
+                  <input
+                    type="checkbox"
+                    id="loading"
+                    name="loading_notice"
+                    className="mr-2 h-4 w-4 appearance-none border border-primary rounded checked:bg-primary checked:border-transparent focus:ring-0 focus:ring-offset-0"
+                    required={!paymentCompleted} // Only required if payment not completed
+                  />
+                  <span className="text-sm 2xl:text-[20px]">
+                    I have read and agree to the loading notice below{" "}
+                    <span className="text-red-500">*</span>
+                  </span>
+                </motion.div>
+              </motion.div>
+            )}
+
             <motion.div
               className="p-6 flex flex-col items-start pt-6"
               initial={{ opacity: 0, y: 30 }}
