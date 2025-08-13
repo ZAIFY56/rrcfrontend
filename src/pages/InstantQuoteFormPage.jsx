@@ -221,11 +221,18 @@ export default function InstantQuoteFormPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const selectedVanPrice = location.state?.totalPrice || 90.0;
-  const [selectedDate, setSelectedDate] = useState(
-    location.state?.selectedDate || ""
+  // Get dates and times from location state
+  const [pickupDate, setPickupDate] = useState(
+    location.state?.pickupDate || ""
   );
-  const [selectedTime, setSelectedTime] = useState(
-    location.state?.selectedTime || ""
+  const [pickupTime, setPickupTime] = useState(
+    location.state?.pickupTime || ""
+  );
+  const [dropoffDate, setDropoffDate] = useState(
+    location.state?.dropoffDate || ""
+  );
+  const [dropoffTime, setDropoffTime] = useState(
+    location.state?.dropoffTime || ""
   );
 
   const [paymentMethod, setPaymentMethod] = useState("cash");
@@ -237,24 +244,36 @@ export default function InstantQuoteFormPage() {
   });
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   // In InstantQuoteFormPage component
+  // Restore from sessionStorage on mount
   useEffect(() => {
-    // Restore from sessionStorage on mount
-    const savedDate = sessionStorage.getItem("quoteSelectedDate");
-    const savedTime = sessionStorage.getItem("quoteSelectedTime");
+    const savedPickupDate = sessionStorage.getItem("quotePickupDate");
+    const savedPickupTime = sessionStorage.getItem("quotePickupTime");
+    const savedDropoffDate = sessionStorage.getItem("quoteDropoffDate");
+    const savedDropoffTime = sessionStorage.getItem("quoteDropoffTime");
 
-    if (savedDate) setSelectedDate(savedDate);
-    if (savedTime) setSelectedTime(savedTime);
+    if (savedPickupDate) setPickupDate(savedPickupDate);
+    if (savedPickupTime) setPickupTime(savedPickupTime);
+    if (savedDropoffDate) setDropoffDate(savedDropoffDate);
+    if (savedDropoffTime) setDropoffTime(savedDropoffTime);
   }, []);
 
   // When receiving props from location state
   useEffect(() => {
-    if (location.state?.selectedDate) {
-      setSelectedDate(location.state.selectedDate);
-      sessionStorage.setItem("quoteSelectedDate", location.state.selectedDate);
+    if (location.state?.pickupDate) {
+      setPickupDate(location.state.pickupDate);
+      sessionStorage.setItem("quotePickupDate", location.state.pickupDate);
     }
-    if (location.state?.selectedTime) {
-      setSelectedTime(location.state.selectedTime);
-      sessionStorage.setItem("quoteSelectedTime", location.state.selectedTime);
+    if (location.state?.pickupTime) {
+      setPickupTime(location.state.pickupTime);
+      sessionStorage.setItem("quotePickupTime", location.state.pickupTime);
+    }
+    if (location.state?.dropoffDate) {
+      setDropoffDate(location.state.dropoffDate);
+      sessionStorage.setItem("quoteDropoffDate", location.state.dropoffDate);
+    }
+    if (location.state?.dropoffTime) {
+      setDropoffTime(location.state.dropoffTime);
+      sessionStorage.setItem("quoteDropoffTime", location.state.dropoffTime);
     }
   }, [location.state]);
 
@@ -285,6 +304,42 @@ export default function InstantQuoteFormPage() {
     sessionStorage.setItem("quoteFormData", JSON.stringify(updatedData));
   };
 
+  // Handle pickup date change
+  const handlePickupDateChange = (e) => {
+    const value = e.target.value;
+    setPickupDate(value);
+    sessionStorage.setItem("quotePickupDate", value);
+
+    // If pickup date changes and is after current dropoff date, reset dropoff date
+    if (value > dropoffDate) {
+      setDropoffDate(value);
+      sessionStorage.setItem("quoteDropoffDate", value);
+    }
+  };
+
+  // Handle pickup time change
+  const handlePickupTimeChange = (e) => {
+    const value = e.target.value;
+    setPickupTime(value);
+    sessionStorage.setItem("quotePickupTime", value);
+  };
+
+  // Handle dropoff date change
+  const handleDropoffDateChange = (e) => {
+    const value = e.target.value;
+    // Ensure dropoff date is not before pickup date
+    if (value >= pickupDate) {
+      setDropoffDate(value);
+      sessionStorage.setItem("quoteDropoffDate", value);
+    }
+  };
+
+  // Handle dropoff time change
+  const handleDropoffTimeChange = (e) => {
+    const value = e.target.value;
+    setDropoffTime(value);
+    sessionStorage.setItem("quoteDropoffTime", value);
+  };
   const handleSubmitForm = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -301,8 +356,10 @@ export default function InstantQuoteFormPage() {
       // Add additional fields
       formDataEncoded.append("paymentMethod", paymentMethod);
       formDataEncoded.append("amount", selectedVanPrice);
-      formDataEncoded.append("selected_date", selectedDate);
-      formDataEncoded.append("selected_time", selectedTime);
+      formDataEncoded.append("pickup_date", pickupDate);
+      formDataEncoded.append("pickup_time", pickupTime);
+      formDataEncoded.append("dropoff_date", dropoffDate);
+      formDataEncoded.append("dropoff_time", dropoffTime);
       formDataEncoded.append(
         "paymentStatus",
         paymentCompleted
@@ -341,7 +398,7 @@ export default function InstantQuoteFormPage() {
     } catch (error) {
       console.error("Form submission error:", error);
       // Show error to user (you might want to add state for this)
-      alert(`Submission failed: ${error.message}`);
+      `Submission failed: ${error.message}`;
     } finally {
       setIsSubmitting(false);
     }
@@ -380,8 +437,14 @@ export default function InstantQuoteFormPage() {
           },
           body: JSON.stringify({
             amount: selectedVanPrice,
-            metadata: formData,
-            return_url: `${window.location.origin}${window.location.pathname}?payment_success=true&date=${encodeURIComponent(selectedDate)}&time${encodeURIComponent(selectedTime)}`,
+            metadata: {
+              ...formData,
+              pickup_date: pickupDate,
+              pickup_time: pickupTime,
+              dropoff_date: dropoffDate,
+              dropoff_time: dropoffTime,
+            },
+            return_url: `${window.location.origin}${window.location.pathname}?payment_success=true&pickup_date=${encodeURIComponent(pickupDate)}&pickup_time=${encodeURIComponent(pickupTime)}&dropoff_date=${encodeURIComponent(dropoffDate)}&dropoff_time=${encodeURIComponent(dropoffTime)}`,
           }),
         }
       );
@@ -560,8 +623,10 @@ We'll process your request and get back to you shortly.`}
           name="_autoresponse_subject"
           value="Thank you for contacting us"
         />
-        <input type="hidden" name="selected_date" value={selectedDate} />
-        <input type="hidden" name="selected_time" value={selectedTime} />
+        <input type="hidden" name="pickup_date" value={pickupDate} />
+        <input type="hidden" name="pickup_time" value={pickupTime} />
+        <input type="hidden" name="dropoff_date" value={dropoffDate} />
+        <input type="hidden" name="dropoff_time" value={dropoffTime} />
         <div className="container mx-auto mt-4 md:mt-14 flex flex-col lg:flex-row gap-8 px-4">
           <motion.div
             className="lg:w-3/4 bg-white"
@@ -721,15 +786,84 @@ We'll process your request and get back to you shortly.`}
               transition={{ duration: 0.8 }}
             >
               <h2 className="text-xl 2xl:text-[32px] font-semibold mb-2">
-                <AnimatedText text="Collection Time" delay={0.2} />
+                <AnimatedText text="Collection & Delivery Times" delay={0.2} />
               </h2>
-              <p className="text-sm mb-4 2xl:text-[20px]">
-                Selected Date: {selectedDate || "Not specified"}
-              </p>
-              <p className="text-sm mb-4 2xl:text-[20px]">
-                Selected Time: {selectedTime || "Not specified"}
-              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="text-sm mb-2 2xl:text-[16px] font-medium">
+                    Pickup:
+                  </p>
+                  <p className="text-sm 2xl:text-[16px]">
+                    Date: {pickupDate || "Not specified"}
+                  </p>
+                  <p className="text-sm 2xl:text-[16px]">
+                    Time: {pickupTime || "Not specified"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm mb-2 2xl:text-[16px] font-medium">
+                    Dropoff:
+                  </p>
+                  <p className="text-sm 2xl:text-[16px]">
+                    Date: {dropoffDate || "Not specified"}
+                  </p>
+                  <p className="text-sm 2xl:text-[16px]">
+                    Time: {dropoffTime || "Not specified"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Add date/time adjustment fields if needed */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label className="block text-sm mb-1">
+                    Adjust Pickup Date:
+                  </label>
+                  <input
+                    type="date"
+                    value={pickupDate}
+                    onChange={handlePickupDateChange}
+                    min={new Date().toISOString().split("T")[0]}
+                    className="p-1 border text-gray-600 rounded text-sm w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm mb-1">
+                    Adjust Pickup Time:
+                  </label>
+                  <input
+                    type="time"
+                    value={pickupTime}
+                    onChange={handlePickupTimeChange}
+                    className="p-1 border text-gray-600 rounded text-sm w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm mb-1">
+                    Adjust Dropoff Date:
+                  </label>
+                  <input
+                    type="date"
+                    value={dropoffDate}
+                    onChange={handleDropoffDateChange}
+                    min={pickupDate}
+                    className="p-1 border text-gray-600 rounded text-sm w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm mb-1">
+                    Adjust Dropoff Time:
+                  </label>
+                  <input
+                    type="time"
+                    value={dropoffTime}
+                    onChange={handleDropoffTimeChange}
+                    className="p-1 border text-gray-600 rounded text-sm w-full"
+                  />
+                </div>
+              </div>
             </motion.div>
+
             <motion.div
               className="p-6 pb-6"
               initial={{ opacity: 0, y: 30 }}

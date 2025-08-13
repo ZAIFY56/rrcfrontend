@@ -286,7 +286,7 @@ const PriceInfo = ({ price, total, breakdown, isInCongestionZone }) => {
   );
 };
 
-const VanCard = ({ van, index, variants, selectedDate, selectedTime }) => {
+const VanCard = ({ van, index, variants }) => {
   const navigate = useNavigate();
 
   const calculatePrice = (
@@ -401,7 +401,6 @@ const VanCard = ({ van, index, variants, selectedDate, selectedTime }) => {
           <span>{van.tripDistance} mi</span>
         </motion.div>
       )}
-
       {van.title === "Luton Van" ? (
         <div className="text-center py-4">
           <p className="text-sm font-semibold text-gray-700">
@@ -417,7 +416,6 @@ const VanCard = ({ van, index, variants, selectedDate, selectedTime }) => {
           isInCongestionZone={isInCongestionZone}
         />
       )}
-
       <motion.button
         className={`w-full py-2 rounded transition ${
           van.title === "Luton Van"
@@ -438,8 +436,10 @@ const VanCard = ({ van, index, variants, selectedDate, selectedTime }) => {
                   pickup: van.pickup,
                   destination: van.destination,
                   distance: van.tripDistance,
-                  selectedDate,
-                  selectedTime,
+                  pickupDate: van.pickupDate,
+                  pickupTime: van.pickupTime,
+                  dropoffDate: van.dropoffDate,
+                  dropoffTime: van.dropoffTime,
                 },
               },
             });
@@ -451,9 +451,10 @@ const VanCard = ({ van, index, variants, selectedDate, selectedTime }) => {
                 totalPrice: total,
                 priceBreakdown: breakdown,
                 isInCongestionZone,
-
-                selectedDate: van.selectedDate,
-                selectedTime: van.selectedTime,
+                pickupDate: van.pickupDate,
+                pickupTime: van.pickupTime,
+                dropoffDate: van.dropoffDate,
+                dropoffTime: van.dropoffTime,
               },
             });
           }
@@ -476,64 +477,141 @@ function GetQuotesPage() {
   const [isDestinationInLondon, setIsDestinationInLondon] = useState(false);
   const [tripTime, setTripTime] = useState(null);
   const [tripMinutes, setTripMinutes] = useState(0);
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
-  const [minDateTime, setMinDateTime] = useState({
+  // Date and time states
+  const [pickupDate, setPickupDate] = useState("");
+  const [pickupTime, setPickupTime] = useState("");
+  const [dropoffDate, setDropoffDate] = useState("");
+  const [dropoffTime, setDropoffTime] = useState("");
+  const [minPickupDateTime, setMinPickupDateTime] = useState({
     date: "",
     time: "",
   });
-
+  const [minDropoffDateTime, setMinDropoffDateTime] = useState({
+    date: "",
+    time: "",
+  });
   useEffect(() => {
     if (tripMinutes > 0) {
       const now = new Date();
-      const bufferMinutes = 30;
+      const bufferMinutes = 30; // Buffer time
       const totalMinutes = tripMinutes + bufferMinutes;
 
-      const minDateTime = new Date(now.getTime() + totalMinutes * 60000);
+      // Calculate minimum pickup time (current time + buffer)
+      const minPickupDateTime = new Date(now.getTime() + bufferMinutes * 60000);
+      const minPickupDateStr = minPickupDateTime.toISOString().split("T")[0];
+      const minPickupHours = minPickupDateTime
+        .getHours()
+        .toString()
+        .padStart(2, "0");
+      const minPickupMinutes = minPickupDateTime
+        .getMinutes()
+        .toString()
+        .padStart(2, "0");
+      const minPickupTimeStr = `${minPickupHours}:${minPickupMinutes}`;
 
-      const minDateStr = minDateTime.toISOString().split("T")[0];
-
-      const hours = minDateTime.getHours().toString().padStart(2, "0");
-      const minutes = minDateTime.getMinutes().toString().padStart(2, "0");
-      const minTimeStr = `${hours}:${minutes}`;
-
-      setMinDateTime({
-        date: minDateStr,
-        time: minTimeStr,
+      setMinPickupDateTime({
+        date: minPickupDateStr,
+        time: minPickupTimeStr,
       });
-      if (selectedDate && selectedDate < minDateStr) {
-        setSelectedDate(minDateStr);
+
+      // Calculate minimum dropoff time (pickup time + trip duration)
+      if (pickupDate && pickupTime) {
+        const [hours, minutes] = pickupTime.split(":").map(Number);
+        const pickupDateTime = new Date(pickupDate);
+        pickupDateTime.setHours(hours, minutes);
+
+        const minDropoffDateTime = new Date(
+          pickupDateTime.getTime() + tripMinutes * 60000
+        );
+        const minDropoffDateStr = minDropoffDateTime
+          .toISOString()
+          .split("T")[0];
+        const minDropoffHours = minDropoffDateTime
+          .getHours()
+          .toString()
+          .padStart(2, "0");
+        const minDropoffMinutes = minDropoffDateTime
+          .getMinutes()
+          .toString()
+          .padStart(2, "0");
+        const minDropoffTimeStr = `${minDropoffHours}:${minDropoffMinutes}`;
+
+        setMinDropoffDateTime({
+          date: minDropoffDateStr,
+          time: minDropoffTimeStr,
+        });
+
+        // Adjust dropoff time if it's before the minimum
+        if (dropoffDate && dropoffTime) {
+          if (
+            dropoffDate < minDropoffDateStr ||
+            (dropoffDate === minDropoffDateStr &&
+              dropoffTime < minDropoffTimeStr)
+          ) {
+            setDropoffDate(minDropoffDateStr);
+            setDropoffTime(minDropoffTimeStr);
+          }
+        }
       }
+    }
+  }, [tripMinutes, pickupDate, pickupTime]);
+
+  // Handle pickup date change
+  const handlePickupDateChange = (e) => {
+    const selected = e.target.value;
+    if (!tripTime || selected >= minPickupDateTime.date) {
+      setPickupDate(selected);
+      // If date is today, make sure time is valid
       if (
-        selectedTime &&
-        ((selectedDate === minDateStr && selectedTime < minTimeStr) ||
-          selectedDate < minDateStr)
+        selected === minPickupDateTime.date &&
+        pickupTime < minPickupDateTime.time
       ) {
-        setSelectedTime(minTimeStr);
+        setPickupTime(minPickupDateTime.time);
       }
     }
-  }, [tripMinutes, selectedDate, selectedTime]);
+  };
 
-  function handleDateChange(event) {
-    const selected = event.target.value;
-    if (!tripTime || selected >= minDateTime.date) {
-      setSelectedDate(selected);
-      if (selected === minDateTime.date && selectedTime < minDateTime.time) {
-        setSelectedTime(minDateTime.time);
-      }
-    }
-  }
-
-  function handleTimeChange(event) {
-    const selected = event.target.value;
+  // Handle pickup time change
+  const handlePickupTimeChange = (e) => {
+    const selected = e.target.value;
     if (
       !tripTime ||
-      selectedDate > minDateTime.date ||
-      (selectedDate === minDateTime.date && selected >= minDateTime.time)
+      pickupDate > minPickupDateTime.date ||
+      (pickupDate === minPickupDateTime.date &&
+        selected >= minPickupDateTime.time)
     ) {
-      setSelectedTime(selected);
+      setPickupTime(selected);
     }
-  }
+  };
+  const handleDropoffDateChange = (e) => {
+    const selected = e.target.value;
+    if (pickupDate && pickupTime) {
+      if (
+        selected > minDropoffDateTime.date ||
+        (selected === minDropoffDateTime.date &&
+          dropoffTime >= minDropoffDateTime.time)
+      ) {
+        setDropoffDate(selected);
+      } else {
+        setDropoffDate(minDropoffDateTime.date);
+      }
+    }
+  };
+  // Handle dropoff time change
+  const handleDropoffTimeChange = (e) => {
+    const selected = e.target.value;
+    if (pickupDate && pickupTime) {
+      if (
+        dropoffDate > minDropoffDateTime.date ||
+        (dropoffDate === minDropoffDateTime.date &&
+          selected >= minDropoffDateTime.time)
+      ) {
+        setDropoffTime(selected);
+      } else {
+        setDropoffTime(minDropoffDateTime.time);
+      }
+    }
+  };
 
   useEffect(() => {
     if (pickupLocation) {
@@ -711,8 +789,9 @@ function GetQuotesPage() {
         <div className="flex justify-between gap-10 items-start">
           <BackButton icon={backIcon} />
           {tripTime && (
-            <p className="text-xs md:mt-6 text-gray-300 ">
-              Earliest available: {minDateTime.date} at {minDateTime.time}
+            <p className="text-xs md:mt-6 text-gray-300">
+              Earliest available pickup: {minPickupDateTime.date} at{" "}
+              {minPickupDateTime.time}
             </p>
           )}
 
@@ -735,20 +814,39 @@ function GetQuotesPage() {
 
         <div className="flex flex-wrap justify-between gap-4">
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-sm mb-1">Pickup from:</label>
+            <label className="block text-sm mb-1">Pickup Location:</label>
             <AutocompleteInput
               placeholder="Enter pickup location"
               defaultValue={pickup}
               onSelect={setPickup}
               setLocation={setPickupLocation}
             />
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={handleDateChange}
-              min={minDateTime.date}
-              className="mt-2 p-1 border text-gray-600 rounded text-sm w-full"
-            />
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs mb-1">Pickup Date:</label>
+                <input
+                  type="date"
+                  value={pickupDate}
+                  onChange={handlePickupDateChange}
+                  min={minPickupDateTime.date}
+                  className="p-1 border text-gray-600 rounded text-sm w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-xs mb-1">Pickup Time:</label>
+                <input
+                  type="time"
+                  value={pickupTime}
+                  onChange={handlePickupTimeChange}
+                  min={
+                    pickupDate === minPickupDateTime.date
+                      ? minPickupDateTime.time
+                      : undefined
+                  }
+                  className="p-1 border text-gray-600 rounded text-sm w-full"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="flex-1 min-w-[200px]">
@@ -759,20 +857,43 @@ function GetQuotesPage() {
               onSelect={setDestination}
               setLocation={setDropoffLocation}
             />
-            <input
-              type="time"
-              value={selectedTime}
-              onChange={handleTimeChange}
-              min={
-                selectedDate === minDateTime.date ? minDateTime.time : undefined
-              }
-              className="mt-2 p-1 border text-gray-600 rounded text-sm w-full"
-            />
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs mb-1">Dropoff Date:</label>
+                <input
+                  type="date"
+                  value={dropoffDate}
+                  onChange={handleDropoffDateChange}
+                  min={minDropoffDateTime.date}
+                  disabled={!pickupDate || !pickupTime}
+                  className="p-1 border text-gray-600 rounded text-sm w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-xs mb-1">Dropoff Time:</label>
+                <input
+                  type="time"
+                  value={dropoffTime}
+                  onChange={handleDropoffTimeChange}
+                  min={
+                    dropoffDate === minDropoffDateTime.date
+                      ? minDropoffDateTime.time
+                      : undefined
+                  }
+                  disabled={!pickupDate || !pickupTime}
+                  className="p-1 border text-gray-600 rounded text-sm w-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
 
-      {tripDistance ? (
+      {tripDistance &&
+      pickupDate &&
+      pickupTime &&
+      dropoffDate &&
+      dropoffTime ? (
         <>
           <motion.div
             className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4"
@@ -780,25 +901,25 @@ function GetQuotesPage() {
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
           >
-            {selectedDate &&
-              selectedTime &&
-              vanOptions.map((van, index) => (
-                <VanCard
-                  key={index}
-                  van={{
-                    ...van,
-                    tripDistance,
-                    pickup,
-                    destination,
-                    isPickupInLondon,
-                    isDestinationInLondon,
-                    selectedDate,
-                    selectedTime,
-                  }}
-                  index={index}
-                  variants={cardVariants}
-                />
-              ))}
+            {vanOptions.map((van, index) => (
+              <VanCard
+                key={index}
+                van={{
+                  ...van,
+                  tripDistance,
+                  pickup,
+                  destination,
+                  isPickupInLondon,
+                  isDestinationInLondon,
+                  pickupDate,
+                  pickupTime,
+                  dropoffDate,
+                  dropoffTime,
+                }}
+                index={index}
+                variants={cardVariants}
+              />
+            ))}
 
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
