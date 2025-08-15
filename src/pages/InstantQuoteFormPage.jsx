@@ -220,8 +220,12 @@ const BackButton = () => (
 export default function InstantQuoteFormPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const selectedVanPrice = location.state?.totalPrice || 90.0;
-  // Get dates and times from location state
+  const [selectedVanPrice, setSelectedVanPrice] = useState(() => {
+    const savedPrice = sessionStorage.getItem("quotePrice");
+    return savedPrice
+      ? parseFloat(savedPrice)
+      : location.state?.totalPrice || 90.0;
+  }); // Get dates and times from location state
   const [pickupDate, setPickupDate] = useState(
     location.state?.pickupDate || ""
   );
@@ -274,6 +278,13 @@ export default function InstantQuoteFormPage() {
     if (location.state?.dropoffTime) {
       setDropoffTime(location.state.dropoffTime);
       sessionStorage.setItem("quoteDropoffTime", location.state.dropoffTime);
+    }
+    if (location.state?.totalPrice) {
+      setSelectedVanPrice(location.state.totalPrice);
+      sessionStorage.setItem(
+        "quotePrice",
+        location.state.totalPrice.toString()
+      );
     }
   }, [location.state]);
 
@@ -392,6 +403,7 @@ export default function InstantQuoteFormPage() {
 
       // Clear saved form data
       sessionStorage.removeItem("quoteFormData");
+      sessionStorage.removeItem("quotePrice");
 
       // Redirect to thank you page
       navigate("/thank-you");
@@ -405,6 +417,8 @@ export default function InstantQuoteFormPage() {
   };
   const handlePayment = async (e) => {
     e.preventDefault();
+    sessionStorage.setItem("quoteFormData", JSON.stringify(formData));
+    sessionStorage.setItem("quotePrice", selectedVanPrice.toString());
 
     // Save form data before payment
     sessionStorage.setItem("quoteFormData", JSON.stringify(formData));
