@@ -239,7 +239,10 @@ export default function InstantQuoteFormPage() {
     location.state?.dropoffTime || ""
   );
 
-  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [paymentMethod, setPaymentMethod] = useState(() => {
+    const savedMethod = sessionStorage.getItem("quotePaymentMethod");
+    return savedMethod || "cash";
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(() => {
     // Initialize form data from sessionStorage if available
@@ -247,7 +250,6 @@ export default function InstantQuoteFormPage() {
     return savedData ? JSON.parse(savedData) : {};
   });
   const [paymentCompleted, setPaymentCompleted] = useState(false);
-  // In InstantQuoteFormPage component
   // Restore from sessionStorage on mount
   useEffect(() => {
     const savedPickupDate = sessionStorage.getItem("quotePickupDate");
@@ -356,7 +358,6 @@ export default function InstantQuoteFormPage() {
     setIsSubmitting(true);
 
     try {
-      // Convert form data to URL-encoded format for FormSubmit.co
       const formDataEncoded = new URLSearchParams();
 
       // Add all form data fields
@@ -364,8 +365,11 @@ export default function InstantQuoteFormPage() {
         formDataEncoded.append(key, formData[key]);
       }
 
-      // Add additional fields
-      formDataEncoded.append("paymentMethod", paymentMethod);
+      // Determine the actual payment method used
+      const actualPaymentMethod = paymentCompleted ? "card" : paymentMethod;
+
+      // Add additional fields with correct payment method
+      formDataEncoded.append("paymentMethod", actualPaymentMethod);
       formDataEncoded.append("amount", selectedVanPrice);
       formDataEncoded.append("pickup_date", pickupDate);
       formDataEncoded.append("pickup_time", pickupTime);
@@ -375,17 +379,17 @@ export default function InstantQuoteFormPage() {
         "paymentStatus",
         paymentCompleted
           ? "paid"
-          : paymentMethod === "cash"
+          : actualPaymentMethod === "cash"
             ? "pending"
             : "paid"
       );
-      formDataEncoded.append("_captcha", "false"); // Disable CAPTCHA if not needed
-      formDataEncoded.append("_template", "table"); // Use table template
+      formDataEncoded.append("_captcha", "false");
+      formDataEncoded.append("_template", "table");
       formDataEncoded.append("_subject", "New Quote Request");
 
-      // Submit to FormSubmit.co
+      // Rest of your submission code...
       const response = await fetch(
-        "https://formsubmit.co/ajax/01bd15225bbe2ad46eaa9a30b3978ce5", // Note the /ajax/ endpoint
+        "https://formsubmit.co/ajax/01bd15225bbe2ad46eaa9a30b3978ce5",
         {
           method: "POST",
           headers: {
@@ -401,16 +405,12 @@ export default function InstantQuoteFormPage() {
         throw new Error(result.message || "Form submission failed");
       }
 
-      // Clear saved form data
       sessionStorage.removeItem("quoteFormData");
       sessionStorage.removeItem("quotePrice");
-
-      // Redirect to thank you page
       navigate("/thank-you");
     } catch (error) {
       console.error("Form submission error:", error);
-      // Show error to user (you might want to add state for this)
-      `Submission failed: ${error.message}`;
+      // Show error to user
     } finally {
       setIsSubmitting(false);
     }
